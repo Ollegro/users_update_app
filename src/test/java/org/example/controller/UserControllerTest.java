@@ -1,4 +1,5 @@
-import org.example.controller.UserController;
+package org.example.controller;
+
 import org.example.model.User;
 import org.example.service.UserService;
 import org.junit.jupiter.api.Test;
