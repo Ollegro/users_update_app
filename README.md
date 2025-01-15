@@ -18,15 +18,15 @@ docker-compose ps
 
 Заполнить таблицу выполнить файл - init.sql (или не заполнять, а добавлять пользователей через POST запросы).
 
-Запросы:
+### Запросы:
 
 Можно использовать PowerShell-команду Invoke-WebRequest или использовать Postman или Swagger/
 Через PowerShell:
 
-DELETE-запрос:    Invoke-WebRequest -Uri http://localhost:8080/users/2 -Method DELETE
+#### DELETE-запрос:    Invoke-WebRequest -Uri http://localhost:8080/users/2 -Method DELETE
 
 
-POST-запрос:
+#### POST-запрос:
 Для POST-запросов с телом JSON используйте параметр -Body:
 
 
@@ -39,7 +39,8 @@ $body = @{
 потом запрос:  Invoke-WebRequest -Uri http://localhost:8080/users -Method POST -Body $body -ContentType "application/json"
 
 
-GET-запрос:  Invoke-WebRequest -Uri http://localhost:8080/users/1 -Method GET
+#### GET-запрос:  Invoke-WebRequest -Uri http://localhost:8080/users/1 -Method GET
 
 
-Добавлены Unit тесты для проверки создания пользователя, работы сервиса и контроллера.
+#### Добавлены Unit тесты для проверки создания пользователя, работы сервиса, контроллера, репозитория.
+Добавлена тестовая база данных h2
