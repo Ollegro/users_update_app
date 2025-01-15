@@ -27,7 +27,7 @@ public class UserControllerTest {
     private UserController userController;
 
     @Test
-    public void testCreateUser() {
+    public void testCreateUser_Success() {
 
         User user = new User();
         user.setName("Ivan Ivanov");
@@ -36,7 +36,7 @@ public class UserControllerTest {
 
         when(userService.createUser(user)).thenReturn(user);
 
-        ResponseEntity<User> response = userController.createUser(user);
+        ResponseEntity<?> response = userController.createUser(user);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(user, response.getBody());
@@ -45,7 +45,53 @@ public class UserControllerTest {
     }
 
     @Test
+    public void testCreateUser_NameIsEmpty() {
+        User user = new User();
+        user.setAge(30);
+        user.setPosition("Developer");
+
+        ResponseEntity<?> response = userController.createUser(user);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Поле 'name' обязательно", response.getBody());
+
+        verify(userService, never()).createUser(user);
+    }
+
+    @Test
+    public void testCreateUser_AgeIsNotPositive() {
+
+        User user = new User();
+        user.setName("Ivan Ivanov");
+        user.setAge(-5);
+        user.setPosition("Developer");
+
+        ResponseEntity<?> response = userController.createUser(user);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Поле 'age' должно быть положительным числом", response.getBody());
+
+        verify(userService, never()).createUser(user);
+    }
+
+    @Test
+    public void testCreateUser_PositionIsEmpty() {
+
+        User user = new User();
+        user.setName("Ivan Ivanov");
+        user.setAge(30);
+
+        ResponseEntity<?> response = userController.createUser(user);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Поле 'position' обязательно", response.getBody());
+
+        verify(userService, never()).createUser(user);
+    }
+
+    @Test
     public void testGetUserById_UserFound() {
+
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
@@ -94,7 +140,6 @@ public class UserControllerTest {
 
     @Test
     public void testDeleteUserById_UserNotExists() {
-
         Long userId = 1L;
 
         when(userService.existsById(userId)).thenReturn(false);
@@ -103,13 +148,14 @@ public class UserControllerTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
+        // Проверка, что метод userService.existsById был вызван, а userService.deleteUserById — нет
         verify(userService, times(1)).existsById(userId);
         verify(userService, never()).deleteUserById(userId);
     }
 
     @Test
     public void testDeleteAllUsers() {
-        // Мокируем вызов userService.deleteAllUsers()
+
         doNothing().when(userService).deleteAllUsers();
 
         ResponseEntity<Void> response = userController.deleteAllUsers();
@@ -136,7 +182,6 @@ public class UserControllerTest {
         users.add(user1);
         users.add(user2);
 
-        // Мокируем вызов userService.getAllUsers()
         when(userService.getAllUsers()).thenReturn(users);
 
         ResponseEntity<Set<User>> response = userController.getAllUsers();
@@ -144,6 +189,7 @@ public class UserControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(users, response.getBody());
 
+        // Проверка, что метод userService.getAllUsers был вызван 1 раз
         verify(userService, times(1)).getAllUsers();
     }
 }

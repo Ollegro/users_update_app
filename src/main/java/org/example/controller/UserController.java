@@ -2,11 +2,9 @@ package org.example.controller;
 
 import org.example.model.User;
 import org.example.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,7 +20,17 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<?> createUser(@RequestBody User user) {
+        if (user.getName() == null || user.getName().isEmpty()) {
+            return ResponseEntity.badRequest().body("Поле 'name' обязательно");
+        }
+        if (user.getAge() <= 0) {
+            return ResponseEntity.badRequest().body("Поле 'age' должно быть положительным числом");
+        }
+        if (user.getPosition() == null || user.getPosition().isEmpty()) {
+            return ResponseEntity.badRequest().body("Поле 'position' обязательно");
+        }
+
         User createdUser = userService.createUser(user);
         return ResponseEntity.ok(createdUser);
     }
