@@ -5,7 +5,10 @@ import org.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -33,6 +36,14 @@ public class UserService {
 
     public boolean existsById(Long id) {
         return userRepository.existsById(id);
+    }
+
+    public Set<User> getAllUsers() {
+        return new HashSet<>(userRepository.findAll());
+    }
+
+    public void deleteAllUsers() {
+        userRepository.deleteAll();
     }
 
 }

@@ -10,7 +10,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -103,5 +105,45 @@ public class UserControllerTest {
 
         verify(userService, times(1)).existsById(userId);
         verify(userService, never()).deleteUserById(userId);
+    }
+
+    @Test
+    public void testDeleteAllUsers() {
+        // Мокируем вызов userService.deleteAllUsers()
+        doNothing().when(userService).deleteAllUsers();
+
+        ResponseEntity<Void> response = userController.deleteAllUsers();
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+
+        verify(userService, times(1)).deleteAllUsers();
+    }
+
+    @Test
+    public void testGetAllUsers() {
+
+        User user1 = new User();
+        user1.setName("Ivan Ivanov");
+        user1.setAge(30);
+        user1.setPosition("Developer");
+
+        User user2 = new User();
+        user2.setName("Petr Petrov");
+        user2.setAge(25);
+        user2.setPosition("Designer");
+
+        Set<User> users = new HashSet<>();
+        users.add(user1);
+        users.add(user2);
+
+        // Мокируем вызов userService.getAllUsers()
+        when(userService.getAllUsers()).thenReturn(users);
+
+        ResponseEntity<Set<User>> response = userController.getAllUsers();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(users, response.getBody());
+
+        verify(userService, times(1)).getAllUsers();
     }
 }

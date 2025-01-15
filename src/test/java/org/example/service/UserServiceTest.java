@@ -8,7 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -44,7 +47,7 @@ public class UserServiceTest {
 
     @Test
     public void testGetUserById_UserFound() {
-        // Подготовка данных
+
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
@@ -112,5 +115,42 @@ public class UserServiceTest {
         assertFalse(exists);
 
         verify(userRepository, times(1)).existsById(userId);
+    }
+
+    @Test
+    public void testDeleteAllUsers() {
+        // Мокируем вызов userRepository.deleteAll()
+        doNothing().when(userRepository).deleteAll();
+
+        userService.deleteAllUsers();
+
+        verify(userRepository, times(1)).deleteAll();
+    }
+
+    @Test
+    public void testGetAllUsers() {
+
+        User user1 = new User();
+        user1.setName("Ivan Ivanov");
+        user1.setAge(30);
+        user1.setPosition("Developer");
+
+        User user2 = new User();
+        user2.setName("Petr Petrov");
+        user2.setAge(25);
+        user2.setPosition("Designer");
+
+        Set<User> users = new HashSet<>();
+        users.add(user1);
+        users.add(user2);
+
+        // Мокируем вызов userRepository.findAll()
+        when(userRepository.findAll()).thenReturn(new ArrayList<>(users));
+
+        Set<User> foundUsers = userService.getAllUsers();
+
+        assertEquals(users, foundUsers);
+
+        verify(userRepository, times(1)).findAll();
     }
 }

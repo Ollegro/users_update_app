@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -98,5 +100,50 @@ public class UserRepositoryTest {
         boolean exists = userRepository.existsById(invalidId);
 
         assertThat(exists).isFalse();
+    }
+
+    @Test
+    public void testDeleteAllUsers() {
+
+        User user1 = new User();
+        user1.setName("Ivan Ivanov");
+        user1.setAge(30);
+        user1.setPosition("Developer");
+
+        User user2 = new User();
+        user2.setName("Petr Petrov");
+        user2.setAge(25);
+        user2.setPosition("Designer");
+
+        entityManager.persistAndFlush(user1);
+        entityManager.persistAndFlush(user2);
+
+        userRepository.deleteAll();
+
+        Set<User> users = new HashSet<>(userRepository.findAll());
+        assertThat(users).isEmpty();
+    }
+
+    @Test
+    public void testGetAllUsers() {
+
+        User user1 = new User();
+        user1.setName("Ivan Ivanov");
+        user1.setAge(30);
+        user1.setPosition("Developer");
+
+        User user2 = new User();
+        user2.setName("Petr Petrov");
+        user2.setAge(25);
+        user2.setPosition("Designer");
+
+        entityManager.persistAndFlush(user1);
+        entityManager.persistAndFlush(user2);
+
+
+        Set<User> users = new HashSet<>(userRepository.findAll());
+
+        assertThat(users).hasSize(2);
+        assertThat(users).contains(user1, user2);
     }
 }
