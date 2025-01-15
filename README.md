@@ -7,10 +7,7 @@
 
 '''git clone https://github.com/Ollegro/users_update_app.git'''
 
-#### Cоберите проект
-
-'''mvn clean package'''
-
+### Для большей уверенности, включите vpn - некоторые зависимости иначе не даются )) 
 
 #### Запустите    
 
@@ -20,13 +17,13 @@
 
 '''docker-compose up -d'''
 
-#### Приложение развернется в контейнере и запустится
+#### Ждите скачивания зависимостей и сборки. Приложение развернется в контейнере и запустится
 
 #### Проверьте что контейнеры запущены
 
 '''docker-compose ps'''
 
-Настройте в IDEA соединение c БД.
+Настройте в IDEA соединение c БД. user - postgres , password - postgres , port - 5432 , db - mydatabase , host - localhost.
 
 На момент запуска приложения таблица users в БД чистая.
 
@@ -41,30 +38,30 @@
 #### POST-запрос:
 Для POST-запросов с телом JSON используйте параметр -Body:
 
-'''''$body = @{
-    name = "Gutsev Oleg"
-    age = 50
-    position = "Developer"
-} | ConvertTo-Json'''''
+'''  $body = @{
+name = "Viktoria Sidorova"
+age = 20
+position = "Developer"
+} | ConvertTo-Json   '''
 
 потом запрос:  
-'''Invoke-WebRequest -Uri http://localhost:8080/users -Method POST -Body $body -ContentType "application/json"'''
+'''   Invoke-WebRequest -Uri http://localhost:8080/users -Method POST -Body $body -ContentType "application/json"   '''
 
 
 #### GET-запрос:  
 Получение 1 пользователя  
-''Invoke-WebRequest -Uri http://localhost:8080/users/1 -Method GET'''
+'''   Invoke-WebRequest -Uri http://localhost:8080/users/1 -Method GET   '''
 
 Получение всех пользователей  
-'''Invoke-WebRequest -Uri http://localhost:8080/users -Method GET'''
+'''   Invoke-WebRequest -Uri http://localhost:8080/users -Method GET  '''
 
 #### DELETE-запрос:
 
 Удаление 2 пользователя   
-'''Invoke-WebRequest -Uri http://localhost:8080/users/2 -Method DELETE'''
+'''  Invoke-WebRequest -Uri http://localhost:8080/users/2 -Method DELETE  '''
 
 Удаление всех пользователей   
-'''Invoke-WebRequest -Uri http://localhost:8080/users -Method DELETE'''
+'''  Invoke-WebRequest -Uri http://localhost:8080/users -Method DELETE  '''
 
 #### Добавлены Unit тесты для проверки создания пользователя, работы сервиса, контроллера, репозитория.
 Добавлена тестовая база данных h2
