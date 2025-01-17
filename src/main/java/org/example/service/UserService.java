@@ -4,13 +4,12 @@ import org.example.model.User;
 import org.example.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UserService {
-
 
     private final UserRepository userRepository;
 
@@ -22,6 +21,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User updateUser(User user) {
+        userRepository.save(user);
+        return user;
+    }
+
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
@@ -30,18 +34,15 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-
-
     public boolean existsById(Long id) {
         return userRepository.existsById(id);
     }
 
-    public Set<User> getAllUsers() {
-        return new HashSet<>(userRepository.findAll());
+    public List<User> getAllUsers() {
+        return new ArrayList<>(userRepository.findAll());
     }
 
     public void deleteAllUsers() {
         userRepository.deleteAll();
     }
-
 }

@@ -10,9 +10,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -28,7 +28,6 @@ public class UserControllerTest {
 
     @Test
     public void testCreateUser_Success() {
-
         User user = new User();
         user.setName("Ivan Ivanov");
         user.setAge(30);
@@ -53,30 +52,43 @@ public class UserControllerTest {
         ResponseEntity<?> response = userController.createUser(user);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Поле 'name' обязательно", response.getBody());
+        assertEquals("Ошибка: Поле 'name' обязательно", response.getBody());
 
         verify(userService, never()).createUser(user);
     }
 
     @Test
-    public void testCreateUser_AgeIsNotPositive() {
-
+    public void testCreateUser_AgeIsBelowMinimum() {
         User user = new User();
         user.setName("Ivan Ivanov");
-        user.setAge(-5);
+        user.setAge(15); // Возраст меньше 16
         user.setPosition("Developer");
 
         ResponseEntity<?> response = userController.createUser(user);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Поле 'age' должно быть положительным числом", response.getBody());
+        assertEquals("Ошибка: Возраст должен быть от 16 до 90 лет. Введенный возраст: 15", response.getBody());
+
+        verify(userService, never()).createUser(user);
+    }
+
+    @Test
+    public void testCreateUser_AgeIsAboveMaximum() {
+        User user = new User();
+        user.setName("Ivan Ivanov");
+        user.setAge(91); // Возраст больше 90
+        user.setPosition("Developer");
+
+        ResponseEntity<?> response = userController.createUser(user);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Ошибка: Возраст должен быть от 16 до 90 лет. Введенный возраст: 91", response.getBody());
 
         verify(userService, never()).createUser(user);
     }
 
     @Test
     public void testCreateUser_PositionIsEmpty() {
-
         User user = new User();
         user.setName("Ivan Ivanov");
         user.setAge(30);
@@ -84,14 +96,13 @@ public class UserControllerTest {
         ResponseEntity<?> response = userController.createUser(user);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Поле 'position' обязательно", response.getBody());
+        assertEquals("Ошибка: Поле 'position' обязательно", response.getBody());
 
         verify(userService, never()).createUser(user);
     }
 
     @Test
     public void testGetUserById_UserFound() {
-
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
@@ -111,7 +122,6 @@ public class UserControllerTest {
 
     @Test
     public void testGetUserById_UserNotFound() {
-
         Long userId = 1L;
 
         when(userService.getUserById(userId)).thenReturn(Optional.empty());
@@ -124,8 +134,85 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUserById_UserExists() {
+    public void testEditUserById_Success() {
+        Long userId = 1L;
+        User updatedUser = new User();
+        updatedUser.setName("Ivan Ivanov");
+        updatedUser.setAge(30);
+        updatedUser.setPosition("Senior Developer");
 
+        User existingUser = new User();
+        existingUser.setId(userId);
+        existingUser.setName("Ivan Ivanov");
+        existingUser.setAge(25);
+        existingUser.setPosition("Developer");
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(existingUser));
+        when(userService.updateUser(existingUser)).thenReturn(existingUser);
+
+        ResponseEntity<?> response = userController.editUserById(userId, updatedUser);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(existingUser, response.getBody());
+
+        verify(userService, times(1)).getUserById(userId);
+        verify(userService, times(1)).updateUser(existingUser);
+    }
+
+    @Test
+    public void testEditUserById_AgeIsBelowMinimum() {
+        Long userId = 1L;
+        User updatedUser = new User();
+        updatedUser.setName("Ivan Ivanov");
+        updatedUser.setAge(15); // Возраст меньше 16
+        updatedUser.setPosition("Senior Developer");
+
+        ResponseEntity<?> response = userController.editUserById(userId, updatedUser);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Ошибка: Возраст должен быть от 16 до 90 лет. Введенный возраст: 15", response.getBody());
+
+        verify(userService, never()).getUserById(userId);
+        verify(userService, never()).updateUser(any());
+    }
+
+    @Test
+    public void testEditUserById_AgeIsAboveMaximum() {
+        Long userId = 1L;
+        User updatedUser = new User();
+        updatedUser.setName("Ivan Ivanov");
+        updatedUser.setAge(91); // Возраст больше 90
+        updatedUser.setPosition("Senior Developer");
+
+        ResponseEntity<?> response = userController.editUserById(userId, updatedUser);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Ошибка: Возраст должен быть от 16 до 90 лет. Введенный возраст: 91", response.getBody());
+
+        verify(userService, never()).getUserById(userId);
+        verify(userService, never()).updateUser(any());
+    }
+
+    @Test
+    public void testEditUserById_UserNotFound() {
+        Long userId = 1L;
+        User updatedUser = new User();
+        updatedUser.setName("Ivan Ivanov");
+        updatedUser.setAge(30);
+        updatedUser.setPosition("Senior Developer");
+
+        when(userService.getUserById(userId)).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = userController.editUserById(userId, updatedUser);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+        verify(userService, times(1)).getUserById(userId);
+        verify(userService, never()).updateUser(any());
+    }
+
+    @Test
+    public void testDeleteUserById_UserExists() {
         Long userId = 1L;
 
         when(userService.existsById(userId)).thenReturn(true);
@@ -148,14 +235,12 @@ public class UserControllerTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
-        // Проверка, что метод userService.existsById был вызван, а userService.deleteUserById — нет
         verify(userService, times(1)).existsById(userId);
         verify(userService, never()).deleteUserById(userId);
     }
 
     @Test
     public void testDeleteAllUsers() {
-
         doNothing().when(userService).deleteAllUsers();
 
         ResponseEntity<Void> response = userController.deleteAllUsers();
@@ -167,7 +252,6 @@ public class UserControllerTest {
 
     @Test
     public void testGetAllUsers() {
-
         User user1 = new User();
         user1.setName("Ivan Ivanov");
         user1.setAge(30);
@@ -178,18 +262,15 @@ public class UserControllerTest {
         user2.setAge(25);
         user2.setPosition("Designer");
 
-        Set<User> users = new HashSet<>();
-        users.add(user1);
-        users.add(user2);
+        List<User> users = Arrays.asList(user1, user2);
 
         when(userService.getAllUsers()).thenReturn(users);
 
-        ResponseEntity<Set<User>> response = userController.getAllUsers();
+        ResponseEntity<List<User>> response = userController.getAllUsers();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(users, response.getBody());
 
-        // Проверка, что метод userService.getAllUsers был вызван 1 раз
         verify(userService, times(1)).getAllUsers();
     }
 }
