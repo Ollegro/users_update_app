@@ -10,6 +10,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "SERIAL") // Явно указываем тип SERIAL
     private Long id;
 
     @Column(nullable = false)
