@@ -8,25 +8,21 @@
 ![img.png](img.png)
 
 #### Клонируйте репозиторий на локальный компьютер
-
-'''git clone https://github.com/Ollegro/users_update_app.git'''
-
+```powershell
+git clone https://github.com/Ollegro/users_update_app.git
+```
 ### Для большей уверенности, включите vpn - некоторые зависимости иначе не даются )) 
 
 #### Запустите    
-
-'''docker-compose up'''
-
-#### для запуска в фоновом режиме      
-
-'''docker-compose up -d'''
-
+```powershell
+docker-compose up
+```
 #### Ждите скачивания зависимостей и сборки. Приложение развернется в контейнере и запустится
 
 #### Проверьте что контейнеры запущены
-
-'''docker-compose ps'''
-
+```powershell
+docker-compose ps
+```
 Настройте в IDEA соединение c БД. user - postgres , password - postgres , port - 5432 , db - mydatabase , host - localhost.
 
 На момент запуска приложения таблица users в БД чистая.
@@ -41,33 +37,51 @@
 
 #### POST-запрос:
 Для POST-запросов с телом JSON используйте параметр -Body, заполняем body:
+```powershell
 $body = @{name = "Viktoria Sidorova";age = 20;position = "Developer"} | ConvertTo-Json
-
+```
 --потом запрос:  
+```powershell
 Invoke-WebRequest -Uri http://localhost:8080/users -Method POST -Body $body -ContentType "application/json" 
-
+```
 #### GET-запрос получения 1 пользователя по id:  
 Получение 1 пользователя  
+```powershell
 Invoke-WebRequest -Uri http://localhost:8080/users/1 -Method GET
-
-Получение всех пользователей  
+```
+Получение всех пользователей 
+```powershell
 Invoke-WebRequest -Uri http://localhost:8080/users -Method GET
-
+```
 
 #### PUT-запрос:
 Изменение 1 пользователя по id
-$url = "http://localhost:8080/users/1"; 
-$body = @{ name = "Viktoria Sidorova"; age = 25; position = "Senior Developer" } | ConvertTo-Json; 
-try { (Invoke-WebRequest -Uri $url -Method Put -Body $body -ContentType "application/json").Content | ConvertFrom-Json } catch { "Ошибка: $($_.Exception.Message)" }
 
+```powershell
+$url = "http://localhost:8080/users/1"
+$body = @{
+    name = "Viktoria Sidorova"
+    age = 25
+    position = "Senior Developer"
+} | ConvertTo-Json
+
+try {
+    $response = Invoke-WebRequest -Uri $url -Method Put -Body $body -ContentType "application/json"
+    $response.Content | ConvertFrom-Json
+} catch {
+    "Ошибка: $($_.Exception.Message)"
+}
+```
 #### DELETE-запрос:
 Удаление 2 пользователя по id 
+```powershell
 Invoke-WebRequest -Uri http://localhost:8080/users/2 -Method DELETE 
-
+```
 #### DELETE-запрос:
 Удаление всех пользователей   
+```powershell
 Invoke-WebRequest -Uri http://localhost:8080/users -Method DELETE
-
+```
 #### Добавлены Unit тесты для проверки создания пользователя, работы сервиса, контроллера, репозитория.
 Добавлена тестовая база данных h2
 
